@@ -1,0 +1,6 @@
+name: StatServiceTestPlugin
+version: 1
+main: example.SomeGame
+depend: [CoreAPI]
+commands:
+  stats: {}

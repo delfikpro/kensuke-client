@@ -1,0 +1,74 @@
+import java.text.SimpleDateFormat
+
+apply plugin: 'maven-publish'
+
+group 'dev.c7x'
+version new SimpleDateFormat("yy.MM.dd.HHmm").format(new Date())
+
+allprojects {
+
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://repo.implario.dev/public"
+        }
+        maven {
+            url "https://repo.implario.dev/cristalix"
+            credentials {
+                username = mavenUser
+                password = mavenPassword
+            }
+        }
+    }
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.incremental = true
+    }
+
+    dependencies {
+        annotationProcessor 'org.projectlombok:lombok:1.18.12'
+        compileOnly 'org.projectlombok:lombok:1.18.12'
+        compileOnly 'bottle:bottle-minecraft:1.0'
+        compileOnly 'bottle:bottle-libs:1.0'
+        compileOnly 'cristalix:bukkit-core:20.11.11'
+        implementation 'implario:java-tools:1.1.3'
+    }
+
+    afterEvaluate {
+
+        jar {
+            from configurations.runtimeClasspath.collect({ it.isDirectory() ? it : zipTree(it) })
+            duplicatesStrategy DuplicatesStrategy.EXCLUDE
+        }
+
+    }
+
+}
+
+
+
+publishing {
+    publications {
+        create('statservice', MavenPublication) {
+            it.groupId = 'ru.cristalix'
+            it.artifactId = 'stat-service-bukkit-api'
+            it.version = project.version
+            it.from components['java']
+        }
+    }
+    repositories {
+        maven {
+            url "https://repo.implario.dev/cristalix"
+            credentials {
+                username = System.getenv("IMPLARIO_REPO_USER")
+                password = System.getenv("IMPLARIO_REPO_PASSWORD")
+            }
+        }
+    }
+}
