@@ -132,7 +132,7 @@ public class StatService implements IStatService, Listener {
 		eventExecutor.registerListener(AsyncPlayerPreLoginEvent.class, this, this::onPreLogin, EventPriority.LOW, false);
 		eventExecutor.registerListener(PlayerLoginEvent.class, this, this::onLogin, EventPriority.MONITOR, false);
 		eventExecutor.registerListener(PlayerJoinEvent.class, this, this::onJoin, EventPriority.NORMAL, false);
-		eventExecutor.registerListener(PlayerQuitEvent.class, this, this::onQuit, EventPriority.NORMAL, false);
+		eventExecutor.registerListener(PlayerQuitEvent.class, this, this::onQuit, EventPriority.HIGHEST, false);
 
 		platform.getScheduler().runSyncRepeating(() -> {
 			if (client.isActive()) client.send(new PacketKeepAlive());
@@ -264,12 +264,17 @@ public class StatService implements IStatService, Listener {
 
 		Map<String, JsonElement> stats = null;
 
+		boolean failed = false;
+
 		try {
 
 			PacketCreateSession connectPacket = new PacketCreateSession(uuid, session, name, realm);
 			stats = client.send(connectPacket).await(PacketSyncData.class).getStats();
 
 		} catch (StatServiceException e) {
+
+			failed = true;
+			e.printStackTrace();
 
 			try {
 				client.send(new PacketEndSession(session));
@@ -278,27 +283,31 @@ public class StatService implements IStatService, Listener {
 			if (dataRequired) {
 				event.setLoginResult(KICK_BANNED);
 				event.setKickMessage("§cБаза данных походу наелась и спит, попробуй зайти ещё раз, может проснётся");
-				e.printStackTrace();
 				return;
 			}
 		}
 
 		if (stats == null) stats = new HashMap<>();
 
-		this.sessionToPlayerCache.put(session, uuid);
+		if (!failed) {
+			this.sessionToPlayerCache.put(session, uuid);
+		}
 		reader = new StatContextImpl(uuid, name, stats);
 
 		System.out.println("Loaded " + name + " in " + (System.currentTimeMillis() - started) + "ms.");
 
 		CompletableFuture<Void> loadedFlag = new CompletableFuture<>();
 
+		boolean finalFailed = failed;
 		platform.getScheduler().runSync(() -> {
 			try {
 				if (loadedFlag.isDone()) return; // Server lagged out
 				for (UserManager<?> userManager : userManagers) {
 					readAndAddUser(userManager, reader);
 				}
-				playerToSessionCache.put(uuid, session);
+				if (!finalFailed) {
+					playerToSessionCache.put(uuid, session);
+				}
 				loadedFlag.complete(null);
 			} catch (Throwable throwable) {
 				for (UserManager<?> userManager : userManagers) {

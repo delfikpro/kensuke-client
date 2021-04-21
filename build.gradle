@@ -17,8 +17,8 @@ allprojects {
         maven {
             url "https://repo.implario.dev/cristalix"
             credentials {
-                username = mavenUser
-                password = mavenPassword
+                username = System.getenv("IMPLARIO_REPO_USER")
+                password = System.getenv("IMPLARIO_REPO_PASSWORD")
             }
         }
     }
@@ -34,9 +34,8 @@ allprojects {
     dependencies {
         annotationProcessor 'org.projectlombok:lombok:1.18.12'
         compileOnly 'org.projectlombok:lombok:1.18.12'
-        compileOnly 'bottle:bottle-minecraft:1.0'
-        compileOnly 'bottle:bottle-libs:1.0'
-        compileOnly 'cristalix:bukkit-core:20.11.11'
+        compileOnly 'cristalix:dark-paper:21.02.03'
+        compileOnly 'cristalix:bukkit-core:21.3.16'
         implementation 'implario:java-tools:1.1.3'
     }
 
