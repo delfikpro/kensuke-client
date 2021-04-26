@@ -1,9 +1,7 @@
-import java.text.SimpleDateFormat
-
 apply plugin: 'maven-publish'
 
-group 'dev.c7x'
-version new SimpleDateFormat("yy.MM.dd.HHmm").format(new Date())
+group 'dev.implario'
+version '1.3.0'
 
 allprojects {
 
@@ -40,34 +38,45 @@ allprojects {
     }
 
     afterEvaluate {
-
         jar {
             from configurations.runtimeClasspath.collect({ it.isDirectory() ? it : zipTree(it) })
             duplicatesStrategy DuplicatesStrategy.EXCLUDE
         }
-
     }
 
 }
 
-
-
 publishing {
-    publications {
-        create('statservice', MavenPublication) {
-            it.groupId = 'ru.cristalix'
-            it.artifactId = 'stat-service-bukkit-api'
-            it.version = project.version
-            it.from components['java']
-        }
-    }
     repositories {
-        maven {
-            url "https://repo.implario.dev/cristalix"
-            credentials {
-                username = System.getenv("IMPLARIO_REPO_USER")
-                password = System.getenv("IMPLARIO_REPO_PASSWORD")
+        if (System.getenv('CI') == null) {
+            mavenLocal()
+        } else {
+            maven {
+                url "https://repo.implario.dev/cristalix"
+                credentials {
+                    username = System.getenv("IMPLARIO_REPO_USER")
+                    password = System.getenv("IMPLARIO_REPO_PASSWORD")
+                }
+            }
+            maven {
+                url = 'https://repository.anfanik.me/c7x/'
+                credentials {
+                    username System.getenv('A5K_USERNAME')
+                    password System.getenv('A5K_PASSWORD')
+                }
             }
         }
     }
+    publications {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version project.version
+            artifact jar
+        }
+    }
+}
+
+tasks.processResources {
+    filter { it.replace('\$version', version as String) }
 }

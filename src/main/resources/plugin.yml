@@ -1,0 +1,4 @@
+name: Kensuke
+version: $version
+main: dev.implario.kensuke.Bootstrap
+depend: [CoreAPI]

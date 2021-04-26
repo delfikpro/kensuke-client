@@ -2,13 +2,9 @@ package example;
 
 import lombok.Getter;
 import lombok.experimental.Delegate;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import ru.cristalix.core.stats.StatContext;
-import ru.cristalix.core.stats.player.PlayerWrapper;
+import dev.implario.kensuke.DataContext;
+import dev.implario.kensuke.player.PlayerWrapper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -27,7 +23,7 @@ public class SomeGameUser extends PlayerWrapper {
 		this.stats = stats;
 	}
 
-	public void save(StatContext writer) {
+	public void save(DataContext writer) {
 		writer.store(SomeGame.statsScope, stats);
 	}
 

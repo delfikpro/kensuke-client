@@ -6,25 +6,23 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.cristalix.core.CoreApi;
 import ru.cristalix.core.IServerPlatform;
-import ru.cristalix.core.realm.IRealmService;
-import ru.cristalix.core.realm.RealmInfo;
-import ru.cristalix.core.stats.PlayerScope;
-import ru.cristalix.core.stats.Scope;
-import ru.cristalix.core.stats.UserManager;
-import ru.cristalix.core.stats.IStatService;
-import ru.cristalix.core.stats.impl.StatService;
-import ru.cristalix.core.stats.impl.network.StatServiceConnectionData;
+import dev.implario.kensuke.scope.PlayerScope;
+import dev.implario.kensuke.scope.Scope;
+import dev.implario.kensuke.UserPool;
+import dev.implario.kensuke.IKensuke;
+import dev.implario.kensuke.impl.Kensuke;
+import dev.implario.kensuke.impl.network.KensukeConnectionData;
 
 public class SomeGame extends JavaPlugin {
 
 	public static final Scope<SomeGameStats> statsScope = new PlayerScope<>("somegame", SomeGameStats.class);
 
-	private UserManager<SomeGameUser> userManager;
+	private UserPool<SomeGameUser> userManager;
 
 	@Override
 	public void onEnable() {
-		IStatService statService = new StatService(IServerPlatform.get(), StatServiceConnectionData.fromEnvironment());
-		CoreApi.get().registerService(IStatService.class, statService);
+		IKensuke statService = new Kensuke(IServerPlatform.get(), KensukeConnectionData.fromEnvironment());
+		CoreApi.get().registerService(IKensuke.class, statService);
 
 		statService.useScopes(statsScope);
 		statService.setDataRequired(false);
