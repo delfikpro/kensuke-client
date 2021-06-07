@@ -6,12 +6,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.cristalix.core.CoreApi;
 import ru.cristalix.core.IServerPlatform;
-import dev.implario.kensuke.scope.PlayerScope;
-import dev.implario.kensuke.scope.Scope;
-import dev.implario.kensuke.UserPool;
-import dev.implario.kensuke.IKensuke;
-import dev.implario.kensuke.impl.Kensuke;
-import dev.implario.kensuke.impl.network.KensukeConnectionData;
+import dev.implario.kensuke_old.scope.PlayerScope;
+import dev.implario.kensuke_old.scope.Scope;
+import dev.implario.kensuke_old.UserPool;
+import dev.implario.kensuke_old.IKensuke;
+import dev.implario.kensuke_old.impl.Kensuke;
+import dev.implario.kensuke_old.impl.network.KensukeConnectionData;
 
 public class SomeGame extends JavaPlugin {
 

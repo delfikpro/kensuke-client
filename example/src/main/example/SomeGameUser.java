@@ -2,8 +2,8 @@ package example;
 
 import lombok.Getter;
 import lombok.experimental.Delegate;
-import dev.implario.kensuke.DataContext;
-import dev.implario.kensuke.player.PlayerWrapper;
+import dev.implario.kensuke_old.DataContext;
+import dev.implario.kensuke_old.player.PlayerWrapper;
 
 import java.util.Collections;
 import java.util.UUID;

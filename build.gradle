@@ -1,4 +1,6 @@
 apply plugin: 'maven-publish'
+apply plugin: 'java'
+apply plugin: 'java-library'
 
 group 'dev.implario'
 version '1.3.0'
@@ -6,6 +8,7 @@ version '1.3.0'
 allprojects {
 
     apply plugin: 'java'
+    apply plugin: 'java-library'
 
     repositories {
         mavenCentral()
@@ -13,10 +16,10 @@ allprojects {
             url "https://repo.implario.dev/public"
         }
         maven {
-            url "https://repo.implario.dev/cristalix"
-            credentials {
-                username = System.getenv("IMPLARIO_REPO_USER")
-                password = System.getenv("IMPLARIO_REPO_PASSWORD")
+            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+
+            content {
+                includeGroup 'org.bukkit'
             }
         }
     }
@@ -32,9 +35,21 @@ allprojects {
     dependencies {
         annotationProcessor 'org.projectlombok:lombok:1.18.12'
         compileOnly 'org.projectlombok:lombok:1.18.12'
-        compileOnly 'cristalix:dark-paper:21.02.03'
-        compileOnly 'cristalix:bukkit-core:21.3.16'
-        implementation 'implario:java-tools:1.1.3'
+        compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+        api 'implario:java-tools:1.1.3'
+        api 'dev.implario:nettier:1.1.3'
+
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+        testCompileOnly 'org.projectlombok:lombok:1.18.12'
+
+        testImplementation 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+
+        testImplementation 'org.mockito:mockito-core:2.24.0'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+//        testImplementation 'implario:java-tools:1.1.3'
+        testCompileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
     }
 
     afterEvaluate {
@@ -44,6 +59,10 @@ allprojects {
         }
     }
 
+}
+
+test {
+    useJUnitPlatform()
 }
 
 publishing {
