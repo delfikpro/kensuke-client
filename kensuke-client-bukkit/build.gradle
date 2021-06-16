@@ -1,0 +1,47 @@
+
+repositories {
+    maven {
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+
+        content {
+            includeGroup 'org.bukkit'
+        }
+    }
+}
+
+configurations {
+    provided
+    compileOnly.extendsFrom(provided)
+}
+
+dependencies {
+    implementation rootProject
+
+    provided 'io.netty:netty-all:4.1.63.Final'
+    provided 'com.google.guava:guava:30.1.1-jre'
+    provided 'com.google.code.gson:gson:2.8.6'
+
+    provided 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+
+    testImplementation 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+}
+
+jar {
+    for (dependency in configurations.runtimeClasspath.collect() - configurations.provided.collect())
+        from(zipTree(dependency))
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+}
+
+publishing {
+    def p = project
+    publications {
+        it.create(p.name, MavenPublication) {
+            it.groupId = p.group
+            it.artifactId = p.name
+            it.version = p.version
+            it.artifact(p.jar)
+        }
+    }
+}
+
+

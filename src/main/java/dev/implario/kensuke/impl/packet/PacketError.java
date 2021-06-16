@@ -7,6 +7,6 @@ import lombok.Data;
 public class PacketError {
 
     private final RemoteException.ErrorLevel errorLevel;
-    private final String message;
+    private final String errorMessage;
 
 }

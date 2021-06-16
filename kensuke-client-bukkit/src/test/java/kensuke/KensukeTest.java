@@ -1,7 +1,8 @@
-package dev.implario.kensuke;
+package kensuke;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import dev.implario.kensuke.*;
 import dev.implario.kensuke.impl.KensukeImpl;
 import dev.implario.kensuke.impl.bukkit.BukkitKensukeAdapter;
 import dev.implario.kensuke.impl.packet.*;

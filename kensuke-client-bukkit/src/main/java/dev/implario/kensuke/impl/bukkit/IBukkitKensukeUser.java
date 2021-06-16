@@ -13,4 +13,8 @@ public interface IBukkitKensukeUser extends IKensukeUser {
         return this.getPlayer() != null;
     }
 
+    default String getName() {
+        return getPlayer().getName();
+    }
+
 }

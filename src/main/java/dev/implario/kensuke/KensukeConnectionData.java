@@ -4,6 +4,7 @@ import implario.Environment;
 import lombok.Data;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Data
 public class KensukeConnectionData {

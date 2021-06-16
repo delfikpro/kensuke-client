@@ -1,12 +1,10 @@
 package dev.implario.kensuke;
 
-import java.util.UUID;
-
 public interface IKensukeUser {
 
     Session getSession();
 
-    default UUID getId() {
+    default String getId() {
         return getSession().getUserId();
     }
 

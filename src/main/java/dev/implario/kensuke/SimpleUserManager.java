@@ -11,14 +11,13 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 @Accessors(chain = true)
-@RequiredArgsConstructor
 public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U> {
 
     @Getter
     private final Set<Scope<?>> scopes;
 
     @Getter
-    private final Map<UUID, U> userMap = new ConcurrentHashMap<>();
+    private final Map<String, U> userMap = new ConcurrentHashMap<>();
 
     private final BiFunction<Session, DataContext, U> reader;
 
@@ -48,7 +47,7 @@ public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U>
 
     @Override
     public U getUser(UUID uuid) {
-        return userMap.get(uuid);
+        return userMap.get(uuid.toString());
     }
 
     @Override

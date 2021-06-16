@@ -5,6 +5,7 @@ import dev.implario.kensuke.KensukeUser;
 import dev.implario.kensuke.Session;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Delegate;
 import org.bukkit.entity.Player;
 
 @Getter

@@ -1,5 +1,6 @@
-package dev.implario.kensuke;
+package dev.implario.kensuke.impl.bukkit;
 
+import dev.implario.kensuke.UserManager;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

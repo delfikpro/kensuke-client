@@ -13,7 +13,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class IdentityUUID {
 
-    @SuppressWarnings("NullableProblems")
     @NonNull
     private final UUID uuid;
 

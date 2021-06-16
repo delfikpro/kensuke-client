@@ -1,7 +1,9 @@
 package dev.implario.kensuke;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface UserManager<U extends IKensukeUser> {
 

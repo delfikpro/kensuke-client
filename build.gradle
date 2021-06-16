@@ -1,25 +1,30 @@
 apply plugin: 'maven-publish'
-apply plugin: 'java'
 apply plugin: 'java-library'
 
-group 'dev.implario'
-version '1.3.0'
 
 allprojects {
 
-    apply plugin: 'java'
+    apply plugin: 'maven-publish'
     apply plugin: 'java-library'
+
+    group 'dev.implario'
+    version '2.0.0'
 
     repositories {
         mavenCentral()
         maven {
             url "https://repo.implario.dev/public"
         }
-        maven {
-            url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
 
-            content {
-                includeGroup 'org.bukkit'
+    publishing {
+        repositories {
+            maven {
+                url "https://repo.implario.dev/public"
+                credentials {
+                    username = System.getenv("IMPLARIO_REPO_USER")
+                    password = System.getenv("IMPLARIO_REPO_PASSWORD")
+                }
             }
         }
     }
@@ -35,67 +40,36 @@ allprojects {
     dependencies {
         annotationProcessor 'org.projectlombok:lombok:1.18.12'
         compileOnly 'org.projectlombok:lombok:1.18.12'
-        compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
-        api 'implario:java-tools:1.1.3'
-        api 'dev.implario:nettier:1.1.3'
 
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
         testCompileOnly 'org.projectlombok:lombok:1.18.12'
 
-        testImplementation 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
-
         testImplementation 'org.mockito:mockito-core:2.24.0'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-//        testImplementation 'implario:java-tools:1.1.3'
         testCompileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     }
 
-    afterEvaluate {
-        jar {
-            from configurations.runtimeClasspath.collect({ it.isDirectory() ? it : zipTree(it) })
-            duplicatesStrategy DuplicatesStrategy.EXCLUDE
-        }
+    test {
+        useJUnitPlatform()
     }
 
 }
 
-test {
-    useJUnitPlatform()
+dependencies {
+    api 'implario:java-tools:1.1.3'
+    api 'dev.implario:nettier:1.1.4'
 }
 
 publishing {
-    repositories {
-        if (System.getenv('CI') == null) {
-            mavenLocal()
-        } else {
-            maven {
-                url "https://repo.implario.dev/cristalix"
-                credentials {
-                    username = System.getenv("IMPLARIO_REPO_USER")
-                    password = System.getenv("IMPLARIO_REPO_PASSWORD")
-                }
-            }
-            maven {
-                url = 'https://repository.anfanik.me/c7x/'
-                credentials {
-                    username System.getenv('A5K_USERNAME')
-                    password System.getenv('A5K_PASSWORD')
-                }
-            }
-        }
-    }
+    def p = project
     publications {
-        maven(MavenPublication) {
-            groupId project.group
-            artifactId project.name
-            version project.version
-            artifact jar
+        it.create(p.name, MavenPublication) {
+            it.groupId = p.group
+            it.artifactId = p.name
+            it.version = p.version
+            it.from(p.components['java'])
         }
     }
-}
-
-tasks.processResources {
-    filter { it.replace('\$version', version as String) }
 }
