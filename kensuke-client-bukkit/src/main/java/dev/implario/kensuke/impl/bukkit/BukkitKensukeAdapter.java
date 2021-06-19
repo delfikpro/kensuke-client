@@ -61,6 +61,7 @@ public class BukkitKensukeAdapter implements Listener {
             long time = System.currentTimeMillis();
             for (Map.Entry<Session, Player> entry : sessionToPlayerMap.entrySet()) {
                 Session session = entry.getKey();
+                if (!session.isActive()) continue;
                 if (session.getLastSave() + 60000 > time) continue;
 
                 kensuke.saveSession(session);
@@ -124,7 +125,7 @@ public class BukkitKensukeAdapter implements Listener {
         DataContext context;
 
         try {
-            kensuke.startSession(session).get(1, TimeUnit.SECONDS);
+            kensuke.startSession(session).get(2, TimeUnit.SECONDS);
 
             loadingPlayers.put(new IdentityUUID(event.getUniqueId()), session);
 //            System.out.println(loadingPlayers.size() + " players cached pre-login");
@@ -179,10 +180,10 @@ public class BukkitKensukeAdapter implements Listener {
 
         Session session = playerToSessionMap.get(player);
 
-        if (session == null) {
+        if (!session.isActive()) {
             event.getPlayer().sendMessage("§cНам не удалось прогрузить ваши данные,");
-            event.getPlayer().sendMessage("§cТекущая сессия не попадёт в статистику.");
-            return;
+            event.getPlayer().sendMessage("§cТекущая игра не попадёт в статистику.");
+            event.getPlayer().sendMessage("§cСообщите разработчикам.");
         }
 
         for (val entry : session.getUserObjects()) {

@@ -3,10 +3,7 @@ package dev.implario.kensuke.impl;
 import com.google.gson.Gson;
 import dev.implario.kensuke.*;
 import dev.implario.kensuke.impl.packet.*;
-import dev.implario.nettier.Nettier;
-import dev.implario.nettier.NettierClient;
-import dev.implario.nettier.PacketQualifier;
-import dev.implario.nettier.RemoteException;
+import dev.implario.nettier.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -110,12 +107,17 @@ public class KensukeImpl implements Kensuke {
             }
         });
         client.setHandshakeHandler(remote -> {
-            remote.send(new PacketAuth(
-                    connectionData.getLogin(),
-                    connectionData.getPassword(),
-                    connectionData.getNodeName(),
-                    new ArrayList<>(sessionMap.keySet())
-            )).await(PacketOk.class, 100, TimeUnit.HOURS);
+            try {
+                remote.send(new PacketAuth(
+                        connectionData.getLogin(),
+                        connectionData.getPassword(),
+                        connectionData.getNodeName(),
+                        new ArrayList<>(sessionMap.keySet())
+                )).await(PacketOk.class, 2, TimeUnit.SECONDS);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                client.close();
+            }
         });
 
         client.addListener(PacketRequestSync.class, (talk, request) -> {
@@ -188,6 +190,8 @@ public class KensukeImpl implements Kensuke {
     }
 
     protected DataContext createSave(Session session) {
+        if (!session.isActive())
+            throw new KensukeException(RemoteException.ErrorLevel.SEVERE, "Tried to save inactive session " + session);
         DataContextImpl dataContext = new DataContextImpl(gson, session.getUserId(), new HashMap<>());
         session.createSave(dataContext);
         return dataContext;
@@ -212,35 +216,56 @@ public class KensukeImpl implements Kensuke {
 
         PacketCreateSession packet = new PacketCreateSession(session.getSessionId(), session.getUserId(), scopes);
 
-        return client.send(packet).awaitFuture(PacketSyncData.class).handle((data, error) -> {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        future.complete(null);
 
-            if (error != null) {
-                logger.log(Level.SEVERE, "Error while fetching data for " + session.getUserId(), error);
+        return future
+                .thenApply(v -> {
+                    System.out.println("Sending...");
+                    Talk talk = client.send(packet);
+                    System.out.println("Sent!");
+                    return talk;
+                })
+                .thenApply(f -> {
+                    System.out.println("Awaiting...");
+                    PacketSyncData data = f.await(PacketSyncData.class, 1, TimeUnit.SECONDS);
+                    System.out.println("Awaited!");
+                    return data;
+                })
+                .handle((data, error) -> {
 
-                endSession(session);
+                    System.out.println(data + " " + error);
 
-                if (isDataRequired) {
-                    throw new KensukeException(RemoteException.ErrorLevel.SEVERE, "Failed to create session: " + error.getMessage());
-                }
-            }
+                    if (error != null) {
+                        logger.log(Level.SEVERE, "Error while fetching data for " + session.getUserId(), error);
 
-            DataContextImpl context = new DataContextImpl(gson, session.getUserId(), data.getData());
+                        endSession(session);
 
-            for (UserMap.Entry<?> entry : session.getUserObjects()) {
-                try {
-                    entry.initUser(session, context);
-                } catch (Exception ex) {
-                    endSession(session);
-                    throw ex;
-                }
-            }
+                        if (isDataRequired) {
+                            throw new KensukeException(RemoteException.ErrorLevel.SEVERE, "Failed to create session: " + error.getMessage());
+                        }
+                    }
 
-            sessionMap.put(session.getSessionId(), session);
-            session.setActive(true);
+                    DataContextImpl context = new DataContextImpl(gson, session.getUserId(),
+                            data == null ? new HashMap<>() : data.getData());
 
-            return null;
+                    for (UserMap.Entry<?> entry : session.getUserObjects()) {
+                        try {
+                            entry.initUser(session, context);
+                        } catch (Exception ex) {
+                            endSession(session);
+                            throw ex;
+                        }
+                    }
 
-        });
+                    sessionMap.put(session.getSessionId(), session);
+
+                    // If data load failed, then deactivate the session
+                    session.setActive(error == null);
+
+                    return null;
+
+                });
     }
 
     @Override

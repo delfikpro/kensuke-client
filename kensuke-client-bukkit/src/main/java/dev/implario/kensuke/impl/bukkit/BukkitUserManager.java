@@ -9,7 +9,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class BukkitUserManager<T extends IBukkitKensukeUser> extends SimpleUserManager<T> {
+public class BukkitUserManager<T extends IKensukeUser> extends SimpleUserManager<T> {
 
     public BukkitUserManager(
             Collection<Scope<?>> scopes,
@@ -25,7 +25,7 @@ public class BukkitUserManager<T extends IBukkitKensukeUser> extends SimpleUserM
 
     public Collection<T> getOnlineUsers() {
         return getUserMap().values().stream()
-                .filter(IBukkitKensukeUser::isPlayerAvailable)
+                .filter(u -> u instanceof IBukkitKensukeUser && ((IBukkitKensukeUser) u).isPlayerAvailable())
                 .collect(Collectors.toList());
     }
 
