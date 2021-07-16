@@ -1,5 +1,7 @@
 package dev.implario.kensuke;
 
+import com.google.gson.Gson;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -7,17 +9,21 @@ import java.util.function.Consumer;
 
 public interface Kensuke {
 
+    Gson getGson();
+
+    void setGson(Gson gson);
+
     CompletableFuture<DataContext> getData(String dataId, Scope<?>... scopes);
 
     CompletableFuture<?> putData(String dataId, Consumer<DataContext> data);
 
-    CompletableFuture<Void> startSession(Session session);
+    CompletableFuture<Void> startSession(KensukeSession session);
 
-    void endSession(Session session);
+    void endSession(KensukeSession session);
 
-    CompletableFuture<Void> saveSession(Session session);
+    CompletableFuture<Void> saveSession(KensukeSession session);
 
-    Session getSession(UUID sessionId);
+    KensukeSession getSession(UUID sessionId);
 
     CompletableFuture<List<LeaderboardEntry<DataContext>>> getLeaderboard(
             Scope<?> criterionScope,

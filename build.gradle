@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'java-library'
 
     group 'dev.implario'
-    version '2.0.4'
+    version '2.0.10'
 
     repositories {
         mavenCentral()
@@ -35,6 +35,7 @@ allprojects {
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
         options.incremental = true
+        options.compilerArgs << '-parameters'
     }
 
     dependencies {

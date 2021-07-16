@@ -6,8 +6,6 @@ import dev.implario.kensuke.*;
 import dev.implario.kensuke.impl.KensukeException;
 import dev.implario.kensuke.impl.KensukeImpl;
 import dev.implario.nettier.RemoteException;
-import implario.LoveHumans;
-import io.netty.buffer.Unpooled;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -39,13 +37,13 @@ public class BukkitKensukeAdapter implements Listener {
     private final Plugin plugin;
 
     // Due to lack of better option to distinguish players in pre-login phase, we are forced to use this hack.
-    private final Cache<IdentityUUID, Session> loadingPlayers = CacheBuilder.newBuilder()
+    private final Cache<IdentityUUID, KensukeSession> loadingPlayers = CacheBuilder.newBuilder()
             .concurrencyLevel(4)
             .expireAfterWrite(15, TimeUnit.SECONDS)
             .build();
 
-    private final Map<Session, Player> sessionToPlayerMap = new HashMap<>();
-    private final Map<Player, Session> playerToSessionMap = new HashMap<>();
+    private final Map<KensukeSession, Player> sessionToPlayerMap = new HashMap<>();
+    private final Map<Player, KensukeSession> playerToSessionMap = new HashMap<>();
 
 //        platform.getScheduler().runSyncRepeating(() -> {
 //            if (client.isActive()) {
@@ -59,8 +57,8 @@ public class BukkitKensukeAdapter implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
             long time = System.currentTimeMillis();
-            for (Map.Entry<Session, Player> entry : sessionToPlayerMap.entrySet()) {
-                Session session = entry.getKey();
+            for (Map.Entry<KensukeSession, Player> entry : sessionToPlayerMap.entrySet()) {
+                KensukeSession session = entry.getKey();
                 if (!session.isActive()) continue;
                 if (session.getLastSave() + 60000 > time) continue;
 
@@ -89,13 +87,14 @@ public class BukkitKensukeAdapter implements Listener {
 
         // Do not load data if login is already forbidden
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+//            System.out.println("disallowed");
             return;
         }
 
         UUID userId = event.getUniqueId();
         UUID sessionId = UUID.randomUUID();
 
-        Session session = new Session(sessionId, userId.toString());
+        KensukeSession session = new KensukeSession(sessionId, userId.toString());
 
         UserLoadEvent loadEvent = new UserLoadEvent(event, kensuke.getGlobalRealm());
 
@@ -110,6 +109,8 @@ public class BukkitKensukeAdapter implements Listener {
             if (!userManager.getScopes().isEmpty())
                 dataUseful = true;
         }
+
+//        System.out.println("больше дебага богу дебага");
 
         // If nobody is using kensuke, then no session will be created.
         // ToDo: Subsequent events are handling this case as an error
@@ -154,7 +155,7 @@ public class BukkitKensukeAdapter implements Listener {
         UUID uuid = player.getUniqueId();
 
 //        System.out.println(loadingPlayers.size() + " players in loading cache");
-        Session session = loadingPlayers.getIfPresent(new IdentityUUID(event.getPlayer().getUniqueId()));
+        KensukeSession session = loadingPlayers.getIfPresent(new IdentityUUID(event.getPlayer().getUniqueId()));
         if (session == null) {
             kensuke.getLogger().warning("No session found for " + uuid + " (" + player.getName() + ") during login");
 //            event.disallow(PlayerLoginEvent.Result.KICK_BANNED, "Kensuke: Вход на сервер занял слишком много времени");
@@ -168,7 +169,7 @@ public class BukkitKensukeAdapter implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onLoginMonitor(PlayerLoginEvent e) {
         if (e.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            Session session = playerToSessionMap.remove(e.getPlayer());
+            KensukeSession session = playerToSessionMap.remove(e.getPlayer());
             if (session != null) sessionToPlayerMap.remove(session);
         }
     }
@@ -178,7 +179,7 @@ public class BukkitKensukeAdapter implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        Session session = playerToSessionMap.get(player);
+        KensukeSession session = playerToSessionMap.get(player);
 
         if (!session.isActive()) {
             event.getPlayer().sendMessage("§cНам не удалось прогрузить ваши данные,");
@@ -203,11 +204,11 @@ public class BukkitKensukeAdapter implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
-        Session session = playerToSessionMap.remove(player);
+        KensukeSession session = playerToSessionMap.remove(player);
 
         if (session == null) {
 
-            Session cachedSession = loadingPlayers.getIfPresent(new IdentityUUID(player.getUniqueId()));
+            KensukeSession cachedSession = loadingPlayers.getIfPresent(new IdentityUUID(player.getUniqueId()));
             if (cachedSession != null) {
                 kensuke.getLogger().warning("Player " + player.getUniqueId() + " (" + player.getName() + ") was tried to be saved during login");
             } else {
@@ -217,7 +218,12 @@ public class BukkitKensukeAdapter implements Listener {
             return;
         }
 
-        kensuke.saveSession(session);
+        try {
+            kensuke.saveSession(session);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         sessionToPlayerMap.remove(session);
         playerToSessionMap.remove(player);
         kensuke.endSession(session);

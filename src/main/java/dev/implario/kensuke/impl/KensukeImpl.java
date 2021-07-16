@@ -25,11 +25,15 @@ public class KensukeImpl implements Kensuke {
     private String globalRealm;
 
     private final Logger logger;
-    private final Gson gson;
+
+    @Getter
+    @Setter
+    private Gson gson;
+
     private final NettierClient client;
     private KensukeConnectionData connectionData;
 
-    private final Map<UUID, Session> sessionMap = new ConcurrentHashMap<>();
+    private final Map<UUID, KensukeSession> sessionMap = new ConcurrentHashMap<>();
 
     private final Set<PacketSyncData> pendingSaves = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -123,7 +127,7 @@ public class KensukeImpl implements Kensuke {
         client.addListener(PacketRequestSync.class, (talk, request) -> {
 
             UUID sessionId = request.getSession();
-            Session session = sessionMap.get(sessionId);
+            KensukeSession session = sessionMap.get(sessionId);
             if (session == null) {
                 talk.respond(new PacketError(RemoteException.ErrorLevel.SEVERE, "No such session"));
                 return;
@@ -148,7 +152,7 @@ public class KensukeImpl implements Kensuke {
 
         client.addListener(PacketEndSession.class, (talk, request) -> {
 
-            Session session = sessionMap.get(request.getSession());
+            KensukeSession session = sessionMap.get(request.getSession());
 
             if (session == null) {
                 logger.warning("Service asked us to end " + request.getSession() + " session, but we don't have it!");
@@ -165,7 +169,7 @@ public class KensukeImpl implements Kensuke {
     }
 
     @Override
-    public CompletableFuture<Void> saveSession(Session session) {
+    public CompletableFuture<Void> saveSession(KensukeSession session) {
         DataContext save;
         try {
             save = createSave(session);
@@ -189,7 +193,7 @@ public class KensukeImpl implements Kensuke {
 
     }
 
-    protected DataContext createSave(Session session) {
+    protected DataContext createSave(KensukeSession session) {
         if (!session.isActive())
             throw new KensukeException(RemoteException.ErrorLevel.SEVERE, "Tried to save inactive session " + session);
         DataContextImpl dataContext = new DataContextImpl(gson, session.getUserId(), new HashMap<>());
@@ -204,7 +208,7 @@ public class KensukeImpl implements Kensuke {
     }
 
     @Override
-    public CompletableFuture<Void> startSession(Session session) {
+    public CompletableFuture<Void> startSession(KensukeSession session) {
 
         boolean isDataRequired = session.getUserObjects().getEntries().stream()
                 .anyMatch(entry -> !entry.getUserManager().isOptional());
@@ -221,20 +225,20 @@ public class KensukeImpl implements Kensuke {
 
         return future
                 .thenApply(v -> {
-                    System.out.println("Sending...");
+//                    System.out.println("Sending...");
                     Talk talk = client.send(packet);
-                    System.out.println("Sent!");
+//                    System.out.println("Sent!");
                     return talk;
                 })
                 .thenApply(f -> {
-                    System.out.println("Awaiting...");
+//                    System.out.println("Awaiting...");
                     PacketSyncData data = f.await(PacketSyncData.class, 1, TimeUnit.SECONDS);
-                    System.out.println("Awaited!");
+//                    System.out.println("Awaited!");
                     return data;
                 })
                 .handle((data, error) -> {
 
-                    System.out.println(data + " " + error);
+//                    System.out.println(data + " " + error);
 
                     if (error != null) {
                         logger.log(Level.SEVERE, "Error while fetching data for " + session.getUserId(), error);
@@ -269,12 +273,12 @@ public class KensukeImpl implements Kensuke {
     }
 
     @Override
-    public Session getSession(UUID sessionId) {
+    public KensukeSession getSession(UUID sessionId) {
         return sessionMap.get(sessionId);
     }
 
     @Override
-    public void endSession(Session session) {
+    public void endSession(KensukeSession session) {
         session.setActive(false);
         sessionMap.remove(session.getSessionId());
         for (UserMap.Entry<?> entry : session.getUserObjects()) {
@@ -314,7 +318,7 @@ public class KensukeImpl implements Kensuke {
         return getLeaderboard(criterionScope, criterionField, limit, manager.getScopes().toArray(new Scope[0]))
                 .thenApply(list -> list.stream()
                         .map(entry -> {
-                            Session session = new Session(null, entry.getData().getId());
+                            KensukeSession session = new KensukeSession(null, entry.getData().getId());
                             return new LeaderboardEntry<>(entry.getPosition(), manager.createUser(session, entry.getData()));
                         }).collect(Collectors.toList()));
     }

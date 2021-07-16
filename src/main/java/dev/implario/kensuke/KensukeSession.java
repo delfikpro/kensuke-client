@@ -8,7 +8,7 @@ import java.util.*;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Session {
+public class KensukeSession {
 
     @EqualsAndHashCode.Include
     private final UUID sessionId;

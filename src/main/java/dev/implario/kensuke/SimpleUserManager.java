@@ -1,7 +1,6 @@
 package dev.implario.kensuke;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -19,7 +18,7 @@ public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U>
     @Getter
     private final Map<String, U> userMap = new ConcurrentHashMap<>();
 
-    private final BiFunction<Session, DataContext, U> reader;
+    private final BiFunction<KensukeSession, DataContext, U> reader;
 
     private final BiConsumer<U, DataContext> writer;
 
@@ -28,7 +27,7 @@ public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U>
     private boolean optional;
 
     public SimpleUserManager(Collection<Scope<?>> scopes,
-                             BiFunction<Session, DataContext, U> reader,
+                             BiFunction<KensukeSession, DataContext, U> reader,
                              BiConsumer<U, DataContext> writer) {
         this.scopes = new HashSet<>(scopes);
         this.reader = reader;
@@ -36,7 +35,7 @@ public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U>
     }
 
     @Override
-    public U createUser(Session session, DataContext context) {
+    public U createUser(KensukeSession session, DataContext context) {
         return reader.apply(session, context);
     }
 

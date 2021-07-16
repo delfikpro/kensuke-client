@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class KensukeUser implements IKensukeUser {
 
-    private final Session session;
+    protected transient final KensukeSession session;
 
 }

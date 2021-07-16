@@ -185,7 +185,7 @@ public class KensukeTest {
         @Delegate
         private final TestStats data;
 
-        private final Session session;
+        private final KensukeSession session;
 
     }
 

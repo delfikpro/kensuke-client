@@ -1,9 +1,7 @@
 package dev.implario.kensuke;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public interface UserManager<U extends IKensukeUser> {
 
@@ -11,7 +9,7 @@ public interface UserManager<U extends IKensukeUser> {
 
     U getUser(UUID uuid);
 
-    U createUser(Session session, DataContext context);
+    U createUser(KensukeSession session, DataContext context);
 
     void saveUser(U user, DataContext context);
 

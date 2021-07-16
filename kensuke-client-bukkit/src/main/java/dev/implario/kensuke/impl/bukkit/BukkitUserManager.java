@@ -2,7 +2,9 @@ package dev.implario.kensuke.impl.bukkit;
 
 import dev.implario.kensuke.*;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ProxiedCommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -13,14 +15,16 @@ public class BukkitUserManager<T extends IKensukeUser> extends SimpleUserManager
 
     public BukkitUserManager(
             Collection<Scope<?>> scopes,
-            BiFunction<Session, DataContext, T> reader,
+            BiFunction<KensukeSession, DataContext, T> reader,
             BiConsumer<T, DataContext> writer
     ) {
         super(scopes, reader, writer);
     }
 
     public T getUser(CommandSender sender) {
-        return sender instanceof Entity ? getUser(((Entity) sender).getUniqueId()) : null;
+        if (!(sender instanceof Player))
+            throw new IllegalArgumentException("Provided sender is not a player");
+        return getUser(((Player) sender).getUniqueId());
     }
 
     public Collection<T> getOnlineUsers() {

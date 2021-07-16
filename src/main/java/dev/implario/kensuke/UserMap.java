@@ -1,12 +1,10 @@
 package dev.implario.kensuke;
 
-import dev.implario.kensuke.impl.DataContextImpl;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import javax.xml.ws.RespectBinding;
 import java.util.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -68,7 +66,7 @@ public class UserMap implements Iterable<UserMap.Entry<?>> {
             if (user != null) userManager.removeUser(user);
         }
 
-        public void initUser(Session session, DataContext context) {
+        public void initUser(KensukeSession session, DataContext context) {
             this.user = userManager.createUser(session, context);
             this.add();
         }
