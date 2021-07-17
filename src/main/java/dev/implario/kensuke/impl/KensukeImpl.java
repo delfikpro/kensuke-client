@@ -133,8 +133,13 @@ public class KensukeImpl implements Kensuke {
                 return;
             }
 
-            if (!session.isActive()) {
+            if (session.getState() == SessionState.UNAPPROVED) {
                 talk.respond(new PacketError(RemoteException.ErrorLevel.WARNING, "Nothing to sync yet"));
+                return;
+            }
+
+            if (session.getState() == SessionState.DEAD) {
+                talk.respond(new PacketError(RemoteException.ErrorLevel.WARNING, "Session already dead"));
                 return;
             }
 
@@ -224,21 +229,9 @@ public class KensukeImpl implements Kensuke {
         future.complete(null);
 
         return future
-                .thenApply(v -> {
-//                    System.out.println("Sending...");
-                    Talk talk = client.send(packet);
-//                    System.out.println("Sent!");
-                    return talk;
-                })
-                .thenApply(f -> {
-//                    System.out.println("Awaiting...");
-                    PacketSyncData data = f.await(PacketSyncData.class, 1, TimeUnit.SECONDS);
-//                    System.out.println("Awaited!");
-                    return data;
-                })
+                .thenApply(v -> client.send(packet))
+                .thenApply(f -> f.await(PacketSyncData.class, 1, TimeUnit.SECONDS))
                 .handle((data, error) -> {
-
-//                    System.out.println(data + " " + error);
 
                     if (error != null) {
                         logger.log(Level.SEVERE, "Error while fetching data for " + session.getUserId(), error);
@@ -264,8 +257,11 @@ public class KensukeImpl implements Kensuke {
 
                     sessionMap.put(session.getSessionId(), session);
 
-                    // If data load failed, then deactivate the session
-                    session.setActive(error == null);
+                    if (error == null) {
+                        session.setState(SessionState.UNAPPROVED);
+                    } else {
+                        session.setState(SessionState.DEAD);
+                    }
 
                     return null;
 
@@ -279,7 +275,7 @@ public class KensukeImpl implements Kensuke {
 
     @Override
     public void endSession(KensukeSession session) {
-        session.setActive(false);
+        session.setState(SessionState.DEAD);
         sessionMap.remove(session.getSessionId());
         for (UserMap.Entry<?> entry : session.getUserObjects()) {
             entry.remove();

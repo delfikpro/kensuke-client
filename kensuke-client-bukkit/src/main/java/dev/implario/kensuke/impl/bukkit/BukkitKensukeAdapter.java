@@ -164,6 +164,8 @@ public class BukkitKensukeAdapter implements Listener {
 
         sessionToPlayerMap.put(session, player);
         playerToSessionMap.put(player, session);
+
+        session.setState(SessionState.ACTIVE);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -210,9 +212,11 @@ public class BukkitKensukeAdapter implements Listener {
 
             KensukeSession cachedSession = loadingPlayers.getIfPresent(new IdentityUUID(player.getUniqueId()));
             if (cachedSession != null) {
-                kensuke.getLogger().warning("Player " + player.getUniqueId() + " (" + player.getName() + ") was tried to be saved during login");
+                kensuke.getLogger().warning("Player " + player.getUniqueId() + " (" + player.getName() +
+                        ") was tried to be saved during login");
             } else {
-                kensuke.getLogger().warning("Player " + player.getUniqueId() + " (" + player.getName() + ") disconnected without having a session");
+                kensuke.getLogger().warning("Player " + player.getUniqueId() + " (" + player.getName() +
+                        ") disconnected without having a session");
             }
 
             return;

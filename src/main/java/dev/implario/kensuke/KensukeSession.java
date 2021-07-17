@@ -19,7 +19,7 @@ public class KensukeSession {
 
     private long lastSave = System.currentTimeMillis();
 
-    private boolean active = false;
+    private SessionState state = SessionState.UNAPPROVED;
 
     @ToString.Exclude
     protected final UserMap userObjects = new UserMap();
@@ -37,6 +37,10 @@ public class KensukeSession {
         for (UserMap.Entry<? extends IKensukeUser> entry : userObjects) {
             entry.writeData(context);
         }
+    }
+
+    public boolean isActive() {
+        return state == SessionState.ACTIVE;
     }
 
 }
