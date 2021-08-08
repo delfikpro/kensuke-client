@@ -230,7 +230,7 @@ public class KensukeImpl implements Kensuke {
 
         return future
                 .thenApply(v -> client.send(packet))
-                .thenApply(f -> f.await(PacketSyncData.class, 1, TimeUnit.SECONDS))
+                .thenApply(f -> f.await(PacketSyncData.class, 3, TimeUnit.SECONDS))
                 .handle((data, error) -> {
 
                     if (error != null) {

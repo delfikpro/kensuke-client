@@ -6,6 +6,7 @@ import dev.implario.kensuke.*;
 import dev.implario.kensuke.impl.KensukeException;
 import dev.implario.kensuke.impl.KensukeImpl;
 import dev.implario.nettier.RemoteException;
+import dev.implario.nettier.impl.client.NettierClientImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.bukkit.Bukkit;
@@ -53,9 +54,15 @@ public class BukkitKensukeAdapter implements Listener {
 
 // todo        Bukkit.getOnlinePlayers().forEach(this::finalSave);
 
+    private long lastCacheCleanup;
+
     public void init() {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (System.currentTimeMillis() - lastCacheCleanup > 1000) {
+                loadingPlayers.cleanUp();
+                lastCacheCleanup = System.currentTimeMillis();
+            }
             long time = System.currentTimeMillis();
             for (Map.Entry<KensukeSession, Player> entry : sessionToPlayerMap.entrySet()) {
                 KensukeSession session = entry.getKey();
@@ -127,7 +134,6 @@ public class BukkitKensukeAdapter implements Listener {
 
         try {
             kensuke.startSession(session).get(2, TimeUnit.SECONDS);
-
             loadingPlayers.put(new IdentityUUID(event.getUniqueId()), session);
 //            System.out.println(loadingPlayers.size() + " players cached pre-login");
         } catch (ExecutionException | TimeoutException | InterruptedException exception) {
@@ -165,7 +171,9 @@ public class BukkitKensukeAdapter implements Listener {
         sessionToPlayerMap.put(session, player);
         playerToSessionMap.put(player, session);
 
-        session.setState(SessionState.ACTIVE);
+        if (session.getState() == SessionState.UNAPPROVED) {
+            session.setState(SessionState.ACTIVE);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

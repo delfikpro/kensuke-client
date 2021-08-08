@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'java-library'
 
     group 'dev.implario'
-    version '2.1.0'
+    version '2.1.5'
 
     repositories {
         mavenCentral()
@@ -60,7 +60,7 @@ allprojects {
 
 dependencies {
     api 'implario:java-tools:1.1.3'
-    api 'dev.implario:nettier:1.1.4'
+    api 'dev.implario:nettier:1.1.5'
 }
 
 publishing {

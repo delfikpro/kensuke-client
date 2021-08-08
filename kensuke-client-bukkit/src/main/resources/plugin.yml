@@ -1,3 +1,0 @@
-main: dev.implario.kensuke.impl.bukkit.BukkitKensuke
-name: Kensuke
-version: $version

@@ -6,7 +6,6 @@ import dev.implario.kensuke.KensukeConnectionData;
 import dev.implario.kensuke.impl.KensukeImpl;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.UtilityClass;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
