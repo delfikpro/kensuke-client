@@ -133,7 +133,7 @@ public class BukkitKensukeAdapter implements Listener {
         DataContext context;
 
         try {
-            kensuke.startSession(session).get(2, TimeUnit.SECONDS);
+            kensuke.startSession(session).get(3, TimeUnit.SECONDS);
             loadingPlayers.put(new IdentityUUID(event.getUniqueId()), session);
 //            System.out.println(loadingPlayers.size() + " players cached pre-login");
         } catch (ExecutionException | TimeoutException | InterruptedException exception) {

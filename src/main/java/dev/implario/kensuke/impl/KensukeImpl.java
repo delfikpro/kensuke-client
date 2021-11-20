@@ -225,12 +225,8 @@ public class KensukeImpl implements Kensuke {
 
         PacketCreateSession packet = new PacketCreateSession(session.getSessionId(), session.getUserId(), scopes);
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        future.complete(null);
-
-        return future
-                .thenApply(v -> client.send(packet))
-                .thenApply(f -> f.await(PacketSyncData.class, 3, TimeUnit.SECONDS))
+        return client.send(packet)
+                .awaitFuture(PacketSyncData.class)
                 .handle((data, error) -> {
 
                     if (error != null) {
