@@ -13,6 +13,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class IdentityUUID {
 
+    public static final boolean DISABLE_IDENTITY_CHECK = System.getenv("KENSUKE_DISABLE_IDENTITY") != null;
+
     @NonNull
     private final UUID uuid;
 
@@ -23,7 +25,7 @@ public class IdentityUUID {
         IdentityUUID that = (IdentityUUID) o;
 
         // Identity comparison
-        return uuid == that.uuid;
+        return DISABLE_IDENTITY_CHECK ? uuid.equals(that.uuid) : uuid == that.uuid;
     }
 
     @Override

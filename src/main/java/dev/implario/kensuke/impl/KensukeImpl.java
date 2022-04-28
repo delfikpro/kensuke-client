@@ -8,9 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -212,6 +210,8 @@ public class KensukeImpl implements Kensuke {
                 .awaitFuture(PacketDataSnapshot.class).thenApply(data -> new DataContextImpl(gson, dataId, data.getData()));
     }
 
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
     @Override
     public CompletableFuture<Void> startSession(KensukeSession session) {
 
@@ -225,9 +225,14 @@ public class KensukeImpl implements Kensuke {
 
         PacketCreateSession packet = new PacketCreateSession(session.getSessionId(), session.getUserId(), scopes);
 
-        return client.send(packet)
-                .awaitFuture(PacketSyncData.class)
-                .handle((data, error) -> {
+        CompletableFuture<PacketSyncData> future = client.send(packet)
+                .awaitFuture(PacketSyncData.class);
+        executorService.schedule(() -> {
+            if (!future.isDone()) {
+                future.completeExceptionally(new TimeoutException("Kensuke didn't respond."));
+            }
+        }, 3, TimeUnit.SECONDS);
+        return future.handle((data, error) -> {
 
                     if (error != null) {
                         logger.log(Level.SEVERE, "Error while fetching data for " + session.getUserId(), error);

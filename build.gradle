@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'java-library'
 
     group 'dev.implario'
-    version '2.1.9'
+    version '2.4-noidentity-variant'
 
     repositories {
         mavenCentral()
@@ -48,7 +48,6 @@ allprojects {
 
         testImplementation 'org.mockito:mockito-core:2.24.0'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-        testCompileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
     }

@@ -2,12 +2,12 @@
 repositories {
     maven {
         url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-
+    }
+    mavenLocal() {
         content {
-            includeGroup 'org.bukkit'
+            excludeGroup 'org.bukkit'
         }
     }
-    mavenLocal()
 }
 
 configurations {
