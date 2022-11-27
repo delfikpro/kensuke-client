@@ -1,14 +1,4 @@
 
-repositories {
-    maven {
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-    mavenLocal() {
-        content {
-            excludeGroup 'org.bukkit'
-        }
-    }
-}
 
 configurations {
     provided
@@ -20,31 +10,13 @@ processResources.filter { it.replace('\$version', version as String) }
 dependencies {
     implementation rootProject
 
-    provided 'io.netty:netty-all:4.1.63.Final'
-    provided 'com.google.guava:guava:30.1.1-jre'
-    provided 'com.google.code.gson:gson:2.8.6'
+    provided 'io.netty:netty-all:4.1.85.Final'
+    provided 'com.google.guava:guava:31.1-jre'
+    provided 'com.google.code.gson:gson:2.10'
 
-    provided 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+    provided 'cristalix:dark-paper:21.02.03'
 
-    testImplementation 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
-}
-
-jar {
-    for (dependency in configurations.runtimeClasspath.collect() - configurations.provided.collect())
-        from(zipTree(dependency))
-    duplicatesStrategy DuplicatesStrategy.EXCLUDE
-}
-
-publishing {
-    def p = project
-    publications {
-        it.create(p.name, MavenPublication) {
-            it.groupId = p.group
-            it.artifactId = p.name
-            it.version = p.version
-            it.artifact(p.jar)
-        }
-    }
+    testImplementation 'cristalix:dark-paper:21.02.03'
 }
 
 
