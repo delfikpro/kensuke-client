@@ -1,5 +1,3 @@
-
-
 configurations {
     provided
     compileOnly.extendsFrom(provided)
@@ -19,4 +17,8 @@ dependencies {
     testImplementation 'cristalix:dark-paper:21.02.03'
 }
 
-
+jar {
+    for (dependency in configurations.runtimeClasspath.collect() - configurations.provided.collect())
+        from(zipTree(dependency))
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+}

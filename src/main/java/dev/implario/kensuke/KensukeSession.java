@@ -13,7 +13,7 @@ public class KensukeSession {
     @EqualsAndHashCode.Include
     private final UUID sessionId;
 
-    private final String userId;
+    private final UUID userId;
 
     private final long creationTime = System.currentTimeMillis();
 

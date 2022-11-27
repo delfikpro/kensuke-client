@@ -16,7 +16,7 @@ public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U>
     private final Set<Scope<?>> scopes;
 
     @Getter
-    private final Map<String, U> userMap = new ConcurrentHashMap<>();
+    private final Map<UUID, U> userMap = new ConcurrentHashMap<>();
 
     private final BiFunction<KensukeSession, DataContext, U> reader;
 
@@ -46,7 +46,7 @@ public class SimpleUserManager<U extends IKensukeUser> implements UserManager<U>
 
     @Override
     public U getUser(UUID uuid) {
-        return userMap.get(uuid.toString());
+        return userMap.get(uuid);
     }
 
     @Override

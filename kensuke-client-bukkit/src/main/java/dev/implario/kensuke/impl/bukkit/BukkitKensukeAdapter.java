@@ -101,7 +101,7 @@ public class BukkitKensukeAdapter implements Listener {
         UUID userId = event.getUniqueId();
         UUID sessionId = UUID.randomUUID();
 
-        KensukeSession session = new KensukeSession(sessionId, userId.toString());
+        KensukeSession session = new KensukeSession(sessionId, userId);
 
         UserLoadEvent loadEvent = new UserLoadEvent(event, kensuke.getGlobalRealm());
 

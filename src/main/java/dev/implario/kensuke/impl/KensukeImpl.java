@@ -199,7 +199,7 @@ public class KensukeImpl implements Kensuke {
     protected DataContext createSave(KensukeSession session) {
         if (!session.isActive())
             throw new KensukeException(RemoteException.ErrorLevel.SEVERE, "Tried to save inactive session " + session);
-        DataContextImpl dataContext = new DataContextImpl(gson, session.getUserId(), new HashMap<>());
+        DataContextImpl dataContext = new DataContextImpl(gson, session.getUserId().toString(), new HashMap<>());
         session.createSave(dataContext);
         return dataContext;
     }
@@ -223,7 +223,7 @@ public class KensukeImpl implements Kensuke {
                 .map(Scope::getId)
                 .collect(Collectors.toList());
 
-        PacketCreateSession packet = new PacketCreateSession(session.getSessionId(), session.getUserId(), scopes);
+        PacketCreateSession packet = new PacketCreateSession(session.getSessionId(), session.getUserId().toString(), scopes);
 
         CompletableFuture<PacketSyncData> future = client.send(packet)
                 .awaitFuture(PacketSyncData.class);
@@ -244,7 +244,7 @@ public class KensukeImpl implements Kensuke {
                         }
                     }
 
-                    DataContextImpl context = new DataContextImpl(gson, session.getUserId(),
+                    DataContextImpl context = new DataContextImpl(gson, session.getUserId().toString(),
                             data == null ? new HashMap<>() : data.getData());
 
                     for (UserMap.Entry<?> entry : session.getUserObjects()) {
@@ -315,7 +315,7 @@ public class KensukeImpl implements Kensuke {
         return getLeaderboard(criterionScope, criterionField, limit, manager.getScopes().toArray(new Scope[0]))
                 .thenApply(list -> list.stream()
                         .map(entry -> {
-                            KensukeSession session = new KensukeSession(null, entry.getData().getId());
+                            KensukeSession session = new KensukeSession(null, entry.getData().getUuid());
                             return new LeaderboardEntry<>(entry.getPosition(), manager.createUser(session, entry.getData()));
                         }).collect(Collectors.toList()));
     }

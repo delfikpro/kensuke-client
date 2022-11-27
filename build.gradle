@@ -1,14 +1,13 @@
 apply plugin: 'maven-publish'
 apply plugin: 'java-library'
 
-
 allprojects {
 
     apply plugin: 'maven-publish'
     apply plugin: 'java-library'
 
     group 'dev.implario'
-    version '2.4-noidentity-variant'
+    version '2.2.2'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -20,18 +19,18 @@ allprojects {
     }
 
     dependencies {
-        annotationProcessor 'org.projectlombok:lombok:1.18.12'
+        api 'implario:java-tools:1.1.3'
+        api 'dev.implario:nettier:1.2.1'
+
+        annotationProcessor 'org.projectlombok:lombok:1.18.24'
         compileOnly 'org.projectlombok:lombok:1.18.12'
 
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
         testCompileOnly 'org.projectlombok:lombok:1.18.12'
 
-        testImplementation 'org.mockito:mockito-core:2.24.0'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+        testImplementation 'org.mockito:mockito-core:4.8.0'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-
-        api 'implario:java-tools:1.1.3'
-        api 'dev.implario:nettier:1.2.1'
     }
 
     publishing {
@@ -62,6 +61,5 @@ allprojects {
                 }
             }
         }
-
     }
 }
